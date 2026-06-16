@@ -13,6 +13,12 @@ The repo has a live, runnable demo of this exact pattern at `demo/FAN-OUT.md` (t
 look up model pricing in parallel, parent merges nine numbers into one table). Point the team
 at it as a worked reference.
 
+Worth saying up front: most modern agent harnesses spawn subagents for you - fan-out is usually
+a built-in capability (Claude Code's subagent/Task tooling, for example), not something you wire
+up by hand. The mechanics are nearly free; the DESIGN is the work. So spend the session on the
+decisions the harness will not make for you: which subtasks, what each child hands back, and -
+critically - which model each child runs on.
+
 ---
 
 ## Why fan-out (which of the 8 properties it buys)
@@ -53,9 +59,15 @@ the right pattern or whether they want a pipeline or routing instead.
    Decide the merge: a table, a ranked list, a single rolled-up status. Decide what the parent
    does when results conflict or one is missing.
 
-4. **Pick the child model.** Wide, mechanical reading is often a job for a cheap model; the
-   parent's synthesis may want a stronger one. Have the team state which model each role uses
-   and why - this is where the cost win is realized or lost.
+4. **Pick the child model - deliberately, and name it.** Do not let the model default, and do
+   not let every child inherit the parent's model. Make the team state, for each child role,
+   exactly which model it runs on and why. Wide, mechanical reading - skim this page, pull these
+   three fields, classify this reading as anomaly-or-not - is almost always a job for the
+   cheapest capable model, not the frontier one. Push back HARD when a team reaches for a big,
+   expensive, "thinking" model on a simple, narrow task: "This child only extracts a date and a
+   number from one page - why is it on the most expensive model you have? What does the big model
+   buy you here that a small one does not?" Reserve the strong model for the parent's synthesis,
+   if anywhere. The entire cost win of fan-out is realized or thrown away right here.
 
 5. **Pick the flavor:**
    - **Sectioning** - different children do different independent subtasks (the source-per-
@@ -77,6 +89,9 @@ the right pattern or whether they want a pipeline or routing instead.
 - "What happens when one child fails, returns junk, or hangs forever? A real fan-out has flaky
   workers." If they are running many children that return at different times and need
   babysitting or early stopping, send them to `../04-tools/TOOL-SUPERVISE-JOBS.md`.
+- "Why is this child on an expensive model? For mechanical reading, extraction, and simple
+  classification the cheapest capable model is usually right - justify any upgrade, do not
+  reach for the frontier model by default."
 - "Did you de-duplicate work? If three children all fetch the same source, you paid three
   times for one result."
 

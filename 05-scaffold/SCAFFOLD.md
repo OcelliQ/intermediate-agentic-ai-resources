@@ -20,6 +20,7 @@ For example:
 ```text
 pipeline-patent-search/
   run-2026-06-16T14-30-00/
+    run.json          orchestrator manifest: the job, the stage order, per-stage status
     01-search/        queries.json, raw-hits.jsonl, status.json
     02-extract/       records.jsonl, status.json
     03-validate/      validated.jsonl, rejects.jsonl, status.json
@@ -47,6 +48,34 @@ Because the run dir is immutable and each stage owns its own dir, you do not hav
 "produced by stage 2 of run X at time T" into every handoff - the path already says it. See
 `../03-handoff/DESIGN-HANDOFF.md`; handoffs should reference files by their path in this tree
 (for example `../01-search/raw-hits.jsonl`) rather than copying them.
+
+## The orchestrator agent
+
+Every pipeline needs something that drives it. Define one **orchestrator agent** whose SOLE job is
+to accept a job and shepherd it through the whole pipeline: create the run dir, run each stage in
+order, check the gate between stages, pass each handoff forward, and decide what to do when a stage
+fails. It may participate in the work - making a routing decision inline, for instance (see
+`../02-patterns/PATTERN-ROUTING.md`) - but keep that participation minimal. The orchestrator owns
+the run dir and writes one top-level record there (`run.json`): the incoming job, the stage order,
+and each stage's status as it completes. It does NOT write inside stage dirs - those belong to the
+stages.
+
+Keep the orchestrator thin on purpose:
+
+- **Observability** - if the orchestrator only sequences stages, the run dir on disk IS the full
+  story of what happened. The moment it does real work in its own head, that work is invisible -
+  in no file, auditable by no one. A thin shepherd keeps all the substance in stage files you can
+  read after the fact.
+- **Repeatability** - a fat orchestrator accumulates context and hidden state across the entire
+  run, so its behaviour depends on everything it has seen; re-run it and you get a different path.
+  A thin one is just control flow, so a re-run reproduces.
+- **Context rot** - the orchestrator touches every stage. If it ingests each stage's full output,
+  its window bloats into exactly the mega-agent you split up to avoid. Have it hold paths, handles,
+  and status - not content. It should never need to read the 40 pages a stage read.
+- **Least privilege** - the orchestrator holds no domain tools. It creates dirs and dispatches
+  stages; the power to search, write, or alert lives in the stages it calls.
+- **One owner at a time** - exactly one orchestrator shepherds a job, and control passes explicitly
+  from stage to stage. Two drivers on one run is how work gets done twice or silently dropped.
 
 ## How to run this session
 
@@ -89,3 +118,6 @@ Because the run dir is immutable and each stage owns its own dir, you do not hav
   format is wrong. Sortable names make this `ls` + read.
 - **Where do large sources live?** Inside the run dir, so handoffs can point at them by relative
   path and line range instead of pasting them. Keep the inputs next to the run that used them.
+- **Is your orchestrator shepherding, or doing the work?** If it reads stage outputs in full,
+  reasons over them, or holds domain tools, it is becoming the mega-agent. Strip it back to: make
+  the run dir, call each stage, check the gate, record status in `run.json`.

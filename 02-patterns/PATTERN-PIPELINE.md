@@ -9,7 +9,15 @@ fixed code path with one LLM call per stage and plain-code gates between them is
 
 The teaching point: a pipeline is **a fixed code path with one LLM call per stage**. Between
 stages sits a **deterministic gate** - plain code that validates, checks a schema, or retries.
-The gate is NOT another agent. Each stage has its own prompt, its own tools, and its own test.
+The gate is NOT another agent: the moment a stage's output is checked by a model rather than by
+plain code, you have reached for actor-critic (`../02-patterns/PATTERN-ACTOR-CRITIC.md`), not a
+pipeline gate. Both are valid - just know which one you are building and why. A hybrid is often
+the best of both: gate the STRUCTURE with deterministic code (schema valid, required keys
+present, values parse, dates in range) and gate only the CONTENT a model is genuinely needed to
+judge with a critic (is this extracted claim actually supported by the cited source? is this
+"anomaly" real or noise?). One seam, two gates: cheap structural checks in code, an actor-critic
+check on the narrow part that needs judgment. Each stage has its own prompt, its own tools, and
+its own test.
 
 Why it is the default shape - it serves five of the eight properties at once:
 

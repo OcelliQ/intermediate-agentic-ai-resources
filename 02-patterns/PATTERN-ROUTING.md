@@ -40,6 +40,13 @@ not fit any class.
    thing: the class label (plus maybe a confidence). It does not extract, summarize, or act -
    it only labels and dispatches. Write the exact set of output labels, including the fallback
    label. Keep the classifier prompt tiny and the model cheap.
+   - **Often the router IS the orchestrator.** In many designs there is no separate classifier
+     agent at all: the orchestrator - the agent running the whole show - makes the routing
+     decision itself, inline. That is common and perfectly fine, but it has a cost - the decision
+     now shares the orchestrator's context. So keep it SHORT and cheap: a label picked from a
+     fixed list, not a sprawling analysis that loads up the orchestrator's window. If choosing the
+     route genuinely needs heavy reading or deep reasoning, push it back out into its own small
+     classifier agent so the orchestrator's context stays clean.
 
 3. **Design each downstream path.** For every class, the team should name the path's model, its
    prompt, and its tool set. This is where specialization and least privilege are spent well:
@@ -62,6 +69,9 @@ not fit any class.
 - "When the classifier is wrong, what is the blast radius? An anomaly mislabeled as 'normal'
   gets silently logged and ignored - is that acceptable? Bias your default toward the safe
   path."
+- "Who actually makes the routing call - a separate classifier, or the orchestrator inline? If
+  it is inline, is the decision short enough that it does not bloat the orchestrator's context?
+  A label from a fixed list is fine; a paragraph of analysis per route is not."
 - "Does the router hold any downstream tools? It should not. It classifies and hands off;
   the power lives in the specialized paths."
 

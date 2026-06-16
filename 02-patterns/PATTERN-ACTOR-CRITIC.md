@@ -48,13 +48,38 @@ the team at it as a worked reference.
    - Experiment-guardian: challenge the statistics, the confounds, and the false-alarm risk.
      "Is this spike outside normal noise, or within it? Could a sensor glitch explain it before
      we wake someone at 3am?"
+   - **Give the critic a rubric where you can.** A rubric is a short list of criteria - written
+     by a human, not the model - that the answer must satisfy. It turns "find what is wrong" into
+     "check the answer against these specific points", so the critique is consistent across runs
+     and is itself testable. Have the critic check the rubric AND still look for problems the
+     rubric did not anticipate. Search-extraction: every extracted field cites a `file:line`,
+     dates are ISO-formatted, and no field appears that is not in the source. Experiment-guardian:
+     an alarm must name the threshold crossed and the sensor id, and rule out a single-sensor
+     glitch before it escalates.
 
 3. **Define the judge.** The judge sees the draft AND the critique and decides the final
    output - it does not loop the generator and critic against each other forever. It reconciles:
-   keep what is verifiable, drop what the critic refuted, and produce one answer. Decide now
-   whether the critic and judge are the same role (critic returns the corrected answer directly)
-   or separate (a third agent reconciles two disagreeing inputs). Separate is stronger when the
-   stakes are high or the critic itself might overreach.
+   keep what is verifiable, drop what the critic refuted, and produce one answer.
+   - **The critic may also BE the judge.** After finding what is wrong, the critic commits to the
+     corrected final answer itself. That is the leanest version - two calls, not three - and a
+     fine default when the critic has a rubric to judge against. Keep judge separate (a third
+     agent reconciles the two disagreeing inputs) when the stakes are high or the critic itself
+     might overreach. Decide which now, and say why.
+
+4. **Decide how many rounds.** One pass (generate, then critique, then judge) is the default, but
+   some tasks need several rounds of critique and revision. If you allow more than one round,
+   pin down three things up front:
+   - **(a) The actor may stay in the same context across rounds.** The generator can keep its
+     working context and revise its own answer in light of the critique - it need not start over
+     each round.
+   - **(b) The critic may be run afresh each round, or not.** A fresh critic each round avoids it
+     getting invested in its own earlier critique; a persistent critic can track whether its
+     earlier points were actually addressed. Pick deliberately, and know which you chose.
+   - **(c) Keep every round separately - never overwrite.** Each round's draft and critique are
+     their own artifacts (e.g. `round-1/`, `round-2/` under the stage dir in
+     `../05-scaffold/SCAFFOLD.md`). The preserved history IS the audit trail: you must be able to
+     see what round 2 changed and why. Overwriting round 1 destroys the observability this
+     pattern exists to give you. Always set a hard round cap so the loop terminates.
 
 ---
 
@@ -68,8 +93,9 @@ the team at it as a worked reference.
   point."
 - "What concretely does the critic check against - the source text? the raw data? - or just its
   own gut? Vague critique is theater. Pin it to the evidence."
-- "Are you spinning? Generate-critique-regenerate-critique forever is a failure mode. The judge
-  decides once and stops."
+- "Are you spinning? A bounded number of rounds is fine - generate-critique-regenerate FOREVER
+  is the failure mode. Set a hard round cap, keep each round as its own artifact (round-1,
+  round-2 ...) rather than overwriting, and let the judge or the cap end it."
 
 ---
 
