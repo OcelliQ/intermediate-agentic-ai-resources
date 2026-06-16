@@ -1,0 +1,17 @@
+{
+  "name": "intermediate-agentic-ai-resources",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Starter prompts and live-demo prompts for the Intermediate Agentic AI workshop.",
+  "license": "ISC",
+  "scripts": {
+    "lint": "npm run lint:md && npm run lint:spell",
+    "lint:md": "markdownlint-cli2 \"**/*.md\"",
+    "lint:spell": "cspell \"**/*.md\" --no-progress",
+    "fix": "markdownlint-cli2 --fix \"**/*.md\""
+  },
+  "devDependencies": {
+    "cspell": "^10.0.1",
+    "markdownlint-cli2": "^0.22.1"
+  }
+}

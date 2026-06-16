@@ -1,0 +1,24 @@
+{
+  // Skip dependencies and VCS internals.
+  "ignores": ["node_modules/**", ".git/**"],
+
+  "config": {
+    // Start from the full default rule set, then relax only what fights these
+    // prose / prompt-style Markdown files.
+    "default": true,
+
+    // MD013: line-length. These files use natural prose line wrapping; we do
+    // not enforce a hard column limit.
+    "MD013": false,
+
+    // MD041: first line should be a top-level heading. Several starter prompts
+    // open with a bold "**This file is a prompt for the agent.**" line by
+    // design, not an H1.
+    "MD041": false,
+
+    // MD033: inline HTML. These prompt files use angle-bracket placeholders in
+    // prose (e.g. <name>, <stage-number>, <verb>-<noun>), which the linter
+    // would otherwise read as HTML tags.
+    "MD033": false
+  }
+}
