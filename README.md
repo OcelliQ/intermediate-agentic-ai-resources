@@ -9,6 +9,9 @@ the concrete artifact.
 The goal is not to hand you answers. It is to give your agent a script for asking you the right
 questions, in the right order, so that what you build is reliable, observable, and testable.
 
+These prompts accompany the slide deck:
+[**intermediate-agentic-ai**](https://github.com/gauravmm/intermediate-agentic-ai).
+
 ## Two kinds of teams
 
 - **Search-and-extraction** - bots that search and extract structured information from patents,
